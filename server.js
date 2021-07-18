@@ -5,6 +5,10 @@ const colors = require('colors')
 
 // Routes files
 const bootcampRoutes = require('./routes/bootcamps')
+const courseRoutes = require('./routes/courses')
+
+// middleware files
+const errorHandler = require('./middleware/error')
 
 // Database files
 const connectDB = require('./config/db')
@@ -27,6 +31,11 @@ if (process.env.NODE_ENV === 'development') {
 
 // Register routes
 app.use('/api/v1/bootcamps', bootcampRoutes)
+app.use('/api/v1/courses', courseRoutes)
+
+
+// Register error middlewares
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000
 
