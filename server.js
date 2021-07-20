@@ -1,11 +1,17 @@
+const path = require('path') 
+
 const express = require('express')
 const dotenv = require('dotenv')
 const morgan = require('morgan')
 const colors = require('colors')
+const fileupload = require('express-fileupload')
+const cookieParser = require('cookie-parser')
+
 
 // Routes files
 const bootcampRoutes = require('./routes/bootcamps')
 const courseRoutes = require('./routes/courses')
+const authRoutes = require('./routes/auth')
 
 // middleware files
 const errorHandler = require('./middleware/error')
@@ -24,14 +30,24 @@ const app = express()
 // Body parser => parse incoming body to json
 app.use(express.json())
 
+// Cookie parser
+app.use(cookieParser())
+
 // Register middlewares
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
 }
 
+// Fileupload middleware
+app.use(fileupload())
+
+// Set static folder
+app.use(express.static(path.join(__dirname,'public')))
+
 // Register routes
 app.use('/api/v1/bootcamps', bootcampRoutes)
 app.use('/api/v1/courses', courseRoutes)
+app.use('/api/v1/auth', authRoutes)
 
 
 // Register error middlewares
