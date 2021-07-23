@@ -6,12 +6,19 @@ const morgan = require('morgan')
 const colors = require('colors')
 const fileupload = require('express-fileupload')
 const cookieParser = require('cookie-parser')
+const mongoSanitize = require('express-mongo-sanitize')
+const helmet = require('helmet')
+const xss = require('xss-clean')
+const cors = require('cors')
+const rateLimit = require('express-rate-limit')
+const hpp = require('hpp')
 
 
 // Routes files
 const bootcampRoutes = require('./routes/bootcamps')
 const courseRoutes = require('./routes/courses')
 const authRoutes = require('./routes/auth')
+const reviewRoutes = require('./routes/reviews')
 
 // middleware files
 const errorHandler = require('./middleware/error')
@@ -41,6 +48,30 @@ if (process.env.NODE_ENV === 'development') {
 // Fileupload middleware
 app.use(fileupload())
 
+// Sanatize data (prevent no-sql injection)
+app.use(mongoSanitize())
+
+// Set security header in req
+app.use(helmet())
+
+// Prevent cross site scripting(xss attacts)
+app.use(xss())
+
+// Making api public (preventing cors errors)
+app.use(cors())
+
+// Preventing http params pollution
+app.use(hpp())
+
+// limiting req per specific time
+const limiter = rateLimit({
+    windowMs:60 * 1000 * 10,
+    max:100
+}) 
+
+// apply to all req
+app.use(limiter)
+
 // Set static folder
 app.use(express.static(path.join(__dirname,'public')))
 
@@ -48,6 +79,7 @@ app.use(express.static(path.join(__dirname,'public')))
 app.use('/api/v1/bootcamps', bootcampRoutes)
 app.use('/api/v1/courses', courseRoutes)
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/reviews',reviewRoutes)
 
 
 // Register error middlewares
